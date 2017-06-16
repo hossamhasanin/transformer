@@ -22,7 +22,8 @@
                         <h3 class="box-title">All tables</h3>
                     </div>
                     <!-- /.box-header -->
-                    <div class="box-body table-responsive no-padding">
+                    <div class="box-body @if (empty($all_tables)) table-responsive no-padding @endif">
+                    @if ($all_tables->isNotEmpty())
                         <table class="table table-hover">
                             <tr>
                                 <th>ID</th>
@@ -48,7 +49,7 @@
                                     </td>
                                     <td>
                                         {{ Form::open(["route" => ["delete_table" ,$table->id] , "method" => "delete"])  }}
-										    <button type="submit" class="btn btn-danger"><i class="fa fa-times"></i> Delete</button>
+										    <button type="submit" class="btn btn-danger"  @click="delete_confirm()" ><i class="fa fa-times"></i> Delete</button>
 									    {{ Form::close() }}
                                     </td>
                                     <td>
@@ -61,6 +62,9 @@
                                </tr>
                             @endforeach
                         </table>
+                    @else
+                        <div class="alert alert-info"><h3>There is no tables add one : <a href="{{ route('add_table') }}">here</a></h3></div>
+                    @endif
                     </div>
                     <!-- /.box-body -->
                 </div>

@@ -278,6 +278,9 @@ Vue.component("noti_undo" , {
     add_new_field_in_edit(){
         this.order_add_field += 1;
         this.add_new_field.push({component: "add_field" , props: {order: this.order_add_field , page: "edit"}});
+    },
+    delete_confirm() {
+      confirm("Are you sure you wanna delete this ?")
     }
 
   },

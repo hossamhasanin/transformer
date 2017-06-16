@@ -518,13 +518,23 @@ public function '. $relation_parent_name .'(){
     public function DeleteTable($table_id)
     {
         $table = a_Tables::find($table_id);
-        $table->fields()->delete();
-        try{
-            DB::statement("DROP TABLE $table->table;");
-        }catch(Exception $e){
-            echo("OHHHH , there is error in database");
+        if (file_exists(app_path($table->module_name.".php")) && isset($table)){
+            $table->fields()->delete();
+            try{
+                DB::statement("DROP TABLE $table->table;");
+            }catch(Exception $e){
+                echo("OHHHH , there is error in database");
+            }
+            if (is_writable(app_path($table->module_name.".php"))){
+                unlink(app_path($table->module_name.".php"));
+            } else{
+                chmod(app_path($table->module_name.".php") , 777);
+                unlink(app_path($table->module_name.".php"));
+            }
+            $table->delete();
+            session()->flash('table_success', 'You deleted the table successfully :)');
+            return redirect()->route("show_all");
         }
-        $table->delete();
     }
 
 }
