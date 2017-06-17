@@ -10,6 +10,9 @@ import add_field from './components/add_field';
 
 import edit_relation from './components/edit_relation';
 
+import multi_choice from './components/multi_choice';
+
+
 require("./bootstrap-toggle.min.js");
 
 // Adding the X-CSRF-Token to all axios request
@@ -39,6 +42,9 @@ Vue.component('add_field', add_field);
 
 Vue.component('edit_relation', edit_relation);
 
+Vue.component('multi_choice', multi_choice);
+
+// important var used in three components
 var back_again = [];
 
 Vue.component("old_field" , {
@@ -171,6 +177,8 @@ Vue.component("noti_undo" , {
     template: '<add_relation></add_relation>'
 })*/
 
+// belong to addOption (uses in multi_custom function)
+var multi_order_add = 0
 
 
  new Vue({
@@ -186,13 +194,16 @@ Vue.component("noti_undo" , {
     send_checks: [],
     deleted_field: null,
     noti_undo: [],
+    // var shared across components (not1_undo , old_field , main page)
     back_again: back_again,
     add_new_relations: [],
     order_add_relaion: parseInt($("#last_relationship").val()),
     order_add_field: parseInt($("#last_field").val()),
     add_new_field: [],
     cat_name: "",
-    edit_cat_name: $("#cat_name").attr("cat_name")
+    edit_cat_name: $("#cat_name").attr("cat_name"),
+    // belong to addOption page (this store component of multi choices)
+    custom_multi_vals: [],
   },
   methods: {
   	add_relation() {
@@ -281,6 +292,28 @@ Vue.component("noti_undo" , {
     },
     delete_confirm() {
       confirm("Are you sure you wanna delete this ?")
+    },
+    send_form_ajax(form , route){
+        // console.log(Object.keys(data).length)
+        // var ready_data = {}
+        // for(var key of Object.keys(data)){
+        //     ready_data[key] = $("#"+data[key]).val()
+        // }
+        var table_id = $("#"+form).attr("table_id")
+        this.$http.post(route+table_id , $("#"+form).serialize()).then(response => {
+            console.log(response)
+        });
+    },
+    multi_custom(controller){
+        var push_test = this.custom_multi_vals
+        if (controller == "remove"){
+            $(".multi_parts").fadeOut(1200 , function wait(){
+                push_test.push({component: "multi_choice"});     
+            })
+        } else if (controller == "add"){
+                multi_order_add += 1
+                push_test.push({component: "multi_choice" , props: {order: multi_order_add}});                
+        }
     }
 
   },

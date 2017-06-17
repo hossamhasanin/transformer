@@ -30,7 +30,7 @@ Route::group(["prefix" => "dashboard" , "middleware" => "auth"] , function (){
 
             Route::post("/add" , "TableController@AddNew")->name("add_table");
 
-            Route::get("/option/{table}" , "TableController@AddOption")->name("add_option")->where("table" , "[a-zA-Z]+|[a-zA-Z]+\d+");
+            Route::get("/option/{table}" , "TableController@AddOption")->name("add_option");
 
             Route::post("/option/{table_id}" , "TableController@StoreOption")->name("store_option")->where("table_id" , "\d+");
 

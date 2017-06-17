@@ -10,7 +10,8 @@
                         <h3 class="box-title">Add options</h3>
                     </div>
                     <!-- /.box-header -->
-                    {{ Form::open(["route" => ["store_option" , $table_id]])  }}
+                    {{-- {{ Form::open(["route" => ["store_option" , $table_id]])  }} --}}
+                    <form id="option_form" table_id = "{{ $table_id }}">
                     <div class="box-body">
                         @if (count($errors) > 0)
                             <div class="alert alert-danger">
@@ -47,7 +48,7 @@
                                         <option value="int(11)" {!! $field_data->field_type == "int(11)" ? "selected" : "" !!}>Integer</option>
                                         <option value="longText" {!! $field_data->field_type == "longText" ? "selected" : "" !!}>LongText</option>
                                         <option value="mediumText" {!! $field_data->field_type == "mediumText" ? "selected" : "" !!}>MediumText</option>
-                                        <option value="varchar(255)" {!! $field_data->field_type == "varchar(255)" ? "selected" : "" !!}>Varchare</option>
+                                        <option value="string" {!! $field_data->field_type == "string" ? "selected" : "" !!}>Varchare</option>
                                         <option value="text" {!! $field_data->field_type == "text" ? "selected" : "" !!}>Text</option>
                                     </select>
                                 </td>
@@ -83,7 +84,7 @@
                                       </div>
                                   </td>
                                 <td>
-                                    <input class="form-control d_value-0" placeholder="Defualt value" value="{{ $field_data->default_value  }}" name="default_value[{{ $field_data->id }}]" type="text">
+                                    <input class="form-control d_value-0" placeholder="Default value" value="{{ $field_data->default_value  }}" name="default_value[{{ $field_data->id }}]" type="text">
                                 </td>
                                 <td>
                                     <input class="form-control d_value-0" placeholder="Label name" value="{{ $field_data->label_name  }}" name="label_name[{{ $field_data->id }}]" type="text">
@@ -94,10 +95,72 @@
                     </div>
                     <!-- /.box-body -->
                     <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <div @click="send_form_ajax('option_form','/transformer/public/api/v1/storeotion/')" class="btn btn-primary">Submit</div>
                     </div>
-                    {{ Form::close() }}
+                    </form>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-success">
+                    <div class="box-header">
+                        <h3 class="box-title">Fields render :</h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Field name</th>
+                                <th>Render type</th>
+                                <th>Options</th>
+                            </tr>
+                             @foreach($fields_data as $field_data)
+                              <tr>
+                                  <input type="hidden" name="ids[{{ $field_data->id }}]" value="{{ $field_data->id }}" class="ids">
+                                <td><input class="form-control f-name f_name-0" value="{{ $field_data->field_name  }}" placeholder="Field Name" name="field_name[{{ $field_data->id }}]" type="text"></td>
+                                <td>
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" value="textbox"> Textbox<br>
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" value="textarea"> Textarea<br>
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" value="checkbox"> Checkbox<br>
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" value="radiobutton"> Radiobutton<br>
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" data-toggle="modal" data-target="#myModal" value="multichoice"> Multi choice field<br>                                                                                                                                                
+                                </td>
+                                <td></td>
+                            </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content" style="border-radius: 10px;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row multi_parts">
+                            <div class="col-md-6">
+                                <div class="btn btn-success" @click="multi_custom('remove')">Use Custom values</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="btn btn-primary">Database values</div>                                
+                            </div>                            
+                        </div>
+                        <div :is="custom_multi_val.component" v-for="custom_multi_val in custom_multi_vals" v-bind="custom_multi_val.props"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary pull-left" @click="multi_custom('add')">Add more</button>
+                        <button type="button" class="btn btn-success pull-left">Save</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>

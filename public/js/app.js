@@ -813,12 +813,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__components_add_field___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__components_add_field__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__components_edit_relation__ = __webpack_require__(36);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__components_edit_relation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__components_edit_relation__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__components_multi_choice__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__components_multi_choice___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__components_multi_choice__);
 
 
 
 
 
 // importing custom components
+
+
 
 
 
@@ -854,6 +858,9 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('add_field', __WEBPACK_IMP
 
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('edit_relation', __WEBPACK_IMPORTED_MODULE_6__components_edit_relation___default.a);
 
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('multi_choice', __WEBPACK_IMPORTED_MODULE_7__components_multi_choice___default.a);
+
+// important var used in three components
 var back_again = [];
 
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component("old_field", {
@@ -947,6 +954,9 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component("noti_undo", {
     template: '<add_relation></add_relation>'
 })*/
 
+// belong to addOption (uses in multi_custom function)
+var multi_order_add = 0;
+
 new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
     el: '#app',
     data: {
@@ -960,13 +970,16 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
         send_checks: [],
         deleted_field: null,
         noti_undo: [],
+        // var shared across components (not1_undo , old_field , main page)
         back_again: back_again,
         add_new_relations: [],
         order_add_relaion: parseInt($("#last_relationship").val()),
         order_add_field: parseInt($("#last_field").val()),
         add_new_field: [],
         cat_name: "",
-        edit_cat_name: $("#cat_name").attr("cat_name")
+        edit_cat_name: $("#cat_name").attr("cat_name"),
+        // belong to addOption page (this store component of multi choices)
+        custom_multi_vals: []
     },
     methods: {
         add_relation: function add_relation() {
@@ -1059,6 +1072,28 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
         },
         delete_confirm: function delete_confirm() {
             confirm("Are you sure you wanna delete this ?");
+        },
+        send_form_ajax: function send_form_ajax(form, route) {
+            // console.log(Object.keys(data).length)
+            // var ready_data = {}
+            // for(var key of Object.keys(data)){
+            //     ready_data[key] = $("#"+data[key]).val()
+            // }
+            var table_id = $("#" + form).attr("table_id");
+            this.$http.post(route + table_id, $("#" + form).serialize()).then(function (response) {
+                console.log(response);
+            });
+        },
+        multi_custom: function multi_custom(controller) {
+            var push_test = this.custom_multi_vals;
+            if (controller == "remove") {
+                $(".multi_parts").fadeOut(1200, function wait() {
+                    push_test.push({ component: "multi_choice" });
+                });
+            } else if (controller == "add") {
+                multi_order_add += 1;
+                push_test.push({ component: "multi_choice", props: { order: multi_order_add } });
+            }
         }
     },
     mounted: function mounted() {
@@ -14921,6 +14956,122 @@ module.exports = g;
 __webpack_require__(8);
 module.exports = __webpack_require__(9);
 
+
+/***/ }),
+/* 44 */,
+/* 45 */,
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ["order"],
+    data: function data() {
+        return {};
+    },
+
+    methods: {
+        remove_thecomponent: function remove_thecomponent() {
+            $(".multi_component-" + this.order).remove();
+        }
+    }
+});
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(2)(
+  /* script */
+  __webpack_require__(52),
+  /* template */
+  __webpack_require__(54),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "C:\\xampp\\htdocs\\transformer\\resources\\assets\\js\\components\\multi_choice.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] multi_choice.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-22651588", Component.options)
+  } else {
+    hotAPI.reload("data-v-22651588", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    class: 'row multi_component-' + _vm.order,
+    staticStyle: {
+      "margin": "10px"
+    }
+  }, [_vm._m(0), _vm._v(" "), _vm._m(1), _vm._v(" "), _c('div', {
+    staticClass: "col-md-1"
+  }, [_c('div', {
+    staticClass: "btn btn-danger",
+    on: {
+      "click": function($event) {
+        _vm.remove_thecomponent()
+      }
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-times",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  })])])])
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "col-md-5"
+  }, [_c('input', {
+    staticClass: "form-control value_multi",
+    attrs: {
+      "type": "text",
+      "placeholder": "Value will send to the server"
+    }
+  })])
+},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "col-md-6"
+  }, [_c('input', {
+    staticClass: "form-control text_multi",
+    attrs: {
+      "type": "text",
+      "placeholder": "Text will be available to see in select box"
+    }
+  })])
+}]}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-22651588", module.exports)
+  }
+}
 
 /***/ })
 /******/ ]);
