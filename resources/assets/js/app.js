@@ -12,6 +12,8 @@ import edit_relation from './components/edit_relation';
 
 import multi_choice from './components/multi_choice';
 
+import render_multichoice_value from './components/render_multichoice_value';
+
 
 require("./bootstrap-toggle.min.js");
 
@@ -43,6 +45,8 @@ Vue.component('add_field', add_field);
 Vue.component('edit_relation', edit_relation);
 
 Vue.component('multi_choice', multi_choice);
+
+Vue.component("render_multichoice_value" , render_multichoice_value);
 
 // important var used in three components
 var back_again = [];
@@ -178,7 +182,8 @@ Vue.component("noti_undo" , {
 })*/
 
 // belong to addOption (uses in multi_custom function)
-var multi_order_add = 0
+//var multi_order_add = 0
+
 
 
  new Vue({
@@ -203,7 +208,9 @@ var multi_order_add = 0
     cat_name: "",
     edit_cat_name: $("#cat_name").attr("cat_name"),
     // belong to addOption page (this store component of multi choices)
-    custom_multi_vals: [],
+    render_multi_values: [],
+    //belong to addOption page (this uses for component render_multichoice_value)
+    render_data_order: 0,
   },
   methods: {
   	add_relation() {
@@ -304,15 +311,42 @@ var multi_order_add = 0
             console.log(response)
         });
     },
-    multi_custom(controller){
-        var push_test = this.custom_multi_vals
-        if (controller == "remove"){
-            $(".multi_parts").fadeOut(1200 , function wait(){
-                push_test.push({component: "multi_choice"});     
-            })
-        } else if (controller == "add"){
-                multi_order_add += 1
-                push_test.push({component: "multi_choice" , props: {order: multi_order_add}});                
+    multi_custom(event){
+        //var push_test = this.custom_multi_vals
+        var target_id = $(event.target).attr("field_id")                    
+        $(".multi_parts-"+target_id).fadeOut(1200 , function(){
+            $("#render_table-"+target_id).fadeIn()
+        })
+            
+        
+        //arr_goo.length = 0
+    },
+    save_multi_custom(event){
+        var target_field = $(event.target).attr("field_id")
+        var m_key = $("#multi_key-"+target_field).val()
+        var m_val =  $("#multi_value-"+target_field).val()
+        this.render_data_order += 1
+        document.getElementById("multichoice_value-"+target_field).value += m_key + "@|" + m_val + "$|";
+        this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: m_key , text: m_val , target_field: target_field}});        
+        document.getElementById("multi_key-"+target_field).value = ""
+        document.getElementById("multi_value-"+target_field).value = ""
+    },
+    edit_multi_vals(event){
+        this.render_multi_values.splice(0);
+        this.render_data_order=0;
+        var target_field = $(event.target).attr("field_id")        
+        var multi_data = document.getElementById("multichoice_value-"+target_field).value;
+        if (multi_data != ""){
+           var data_seprated = multi_data.match(/(\w+)/g);
+           console.log(data_seprated)
+           //for(var s=0;s<data_seprated.length;s++){
+               var s = 0;
+            while(s < data_seprated.length){
+                this.render_data_order += 1
+                this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: data_seprated[s] , text: data_seprated[s+1] , target_field: target_field}});        
+                s += 2
+                console.log(s)
+            }
         }
     }
 

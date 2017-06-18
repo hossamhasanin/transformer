@@ -115,15 +115,16 @@
                                 <th>Options</th>
                             </tr>
                              @foreach($fields_data as $field_data)
-                              <tr>
+                              <tr id="field_render_container-{{ $field_data->id }}">
                                   <input type="hidden" name="ids[{{ $field_data->id }}]" value="{{ $field_data->id }}" class="ids">
+                                  <input type="hidden" id="multichoice_value-{{ $field_data->id }}" name="multichoice_value[{{ $field_data->id }}]" value="">
                                 <td><input class="form-control f-name f_name-0" value="{{ $field_data->field_name  }}" placeholder="Field Name" name="field_name[{{ $field_data->id }}]" type="text"></td>
                                 <td>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="textbox"> Textbox<br>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="textarea"> Textarea<br>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="checkbox"> Checkbox<br>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="radiobutton"> Radiobutton<br>
-                                    <input type="radio" name="render_type[{{ $field_data->id }}]" data-toggle="modal" data-target="#myModal" value="multichoice"> Multi choice field<br>                                                                                                                                                
+                                    <input type="radio" name="render_type[{{ $field_data->id }}]" @click="edit_multi_vals($event)" field_id="{{ $field_data->id }}" data-toggle="modal" data-target="#myModal-{{ $field_data->id }}" value="multichoice"> Multi choice field<br>                                                                                                                                                
                                 </td>
                                 <td></td>
                             </tr>
@@ -133,35 +134,53 @@
                 </div>
             </div>
         </div>
-        <!-- Modal -->
-        <div id="myModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
+            @foreach($fields_data as $field_data)        
+            <!-- Modal -->
+            <div id="myModal-{{ $field_data->id }}"  class="modal fade" role="dialog">
+                <div class="modal-dialog">
 
-                <!-- Modal content-->
-                <div class="modal-content" style="border-radius: 10px;">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Modal Header</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row multi_parts">
-                            <div class="col-md-6">
-                                <div class="btn btn-success" @click="multi_custom('remove')">Use Custom values</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="btn btn-primary">Database values</div>                                
-                            </div>                            
+                    <!-- Modal content-->
+                    <div class="modal-content" style="border-radius: 10px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Modal Header {{ $field_data->id }}</h4>
                         </div>
-                        <div :is="custom_multi_val.component" v-for="custom_multi_val in custom_multi_vals" v-bind="custom_multi_val.props"></div>
+                        <div class="modal-body" modal_id="{{ $field_data->id }}">
+                            <div class="row multi_parts-{{ $field_data->id }}">
+                                <div class="col-md-6">
+                                    <div class="btn btn-success" field_id="{{ $field_data->id }}" @click="multi_custom($event)">Use Custom values</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="btn btn-primary">Database values</div>                                
+                                </div>                            
+                            </div>
+                            <div id="render_table-{{ $field_data->id }}" style="display:none;">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="box box-primary">
+                                            <div class="box-body">
+                                                <table class="table table-bordered">
+                                                    <tr>
+                                                        <th>Value</th>
+                                                        <th>Text</th>
+                                                    </tr>
+                                                    <tr :is="render_multi_value.component" v-for="render_multi_value in render_multi_values" v-bind="render_multi_value.props"></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <multi_choice :order="1" :target_field="{{ $field_data->id }}"></multi_choice>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success pull-left" @click="save_multi_custom($event)" field_id = "{{ $field_data->id }}">Save</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary pull-left" @click="multi_custom('add')">Add more</button>
-                        <button type="button" class="btn btn-success pull-left">Save</button>
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
 
+                </div>
             </div>
-        </div>
+        @endforeach
     </section>
 @stop
