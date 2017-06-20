@@ -152,12 +152,18 @@
             </div>
         </div>
         <div class="row" style="margin-bottom: 10px;">
+        @if ($all_tables->isNotEmpty())        
             <div class="col-md-4">
                 <div class="btn btn-success" v-on:click="add_new_relation({{ $all_fields }})" >New Relationship <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
             </div>
+        @endif
         </div>
-        <div :is="add_new.component" v-for="add_new in add_new_relations" v-bind="add_new.props" :all_tables="{{ $all_tables }}"></div>
+        @if ($all_tables->isNotEmpty())
+            <div :is="add_new.component" v-for="add_new in add_new_relations" v-bind="add_new.props" :all_tables="{{ $all_tables }}"></div>
+        @else
+            <div class="row" style="margin: 20px;"><div class="col-md-6 alert alert-info"><h3>Not found Relationships</h3></div></div>
+        @endif
         @foreach($relations as $relation)
                 <edit_relation ids="{{ $relation->id }}" table_id="{{ $table_id }}" :all_tables="{{ $all_tables }}" relation_table="{{ $relation->parent_table->table }}" field="{{ $relation->fields->field_name }}" :all_fields="{{ $all_fields }}" relation_name="{{ $relation->relation_name }}"></edit_relation>
         @endforeach

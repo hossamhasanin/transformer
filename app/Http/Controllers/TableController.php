@@ -277,7 +277,7 @@ public function '. $relation_parent_name .'(){
 
         $table_name = a_Tables::where("slug" , $table)->first()->table;
 
-        $all_tables = a_Tables::pluck("table");
+        $all_tables = a_Tables::where("slug" , "!=" , $table)->pluck("table");
 
         $last_relationship = isset(relationships::orderBy('id', 'desc')->first()->id) ? relationships::orderBy('id', 'desc')->first()->id : 0;
 

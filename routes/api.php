@@ -23,4 +23,5 @@ Route::group(["prefix" => "v1" , "middleware" => "auth:api"] , function (){
     Route::post("storeotion/{table_id}","Api\TableControllerApi@StoreOption")->name("storeotion");
     Route::post("storerender/{table_id}" , "Api\TableControllerApi@StoreFieldRender");
     Route::delete("delete_relationship/{relation_table}/{child_table_id}/{relation_id}" , "Api\TableControllerApi@DeleteRelationship")->name("delete_relationship_api");
+    Route::post("table_add/data" , "Api\TableControllerApi@GetRequireData");
 });

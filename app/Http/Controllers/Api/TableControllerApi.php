@@ -184,4 +184,15 @@ class TableControllerApi extends Controller
         
     }
 
+    public function GetRequireData(Request $request)
+    {
+        if ($request->mode == "add"){
+            $required_data = a_Tables::get();
+            return response($required_data);
+        } elseif ($request->mode == "edit"){
+            $required_data = a_Tables::where("slug" , "!=" , $request->explode)->get();
+            return response($required_data);
+        }
+    }
+
 }

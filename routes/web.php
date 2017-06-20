@@ -34,7 +34,7 @@ Route::group(["prefix" => "dashboard" , "middleware" => "auth"] , function (){
 
             Route::post("/option/{table_id}" , "TableController@StoreOption")->name("store_option")->where("table_id" , "\d+");
 
-            Route::get("/edit/{table}" , "TableController@EditTable")->name("edit_table")->where("table" , "[a-zA-Z]+|[a-zA-Z]+\d+");
+            Route::get("/edit/{table}" , "TableController@EditTable")->name("edit_table");
 
             Route::put("/update/{table_id}" , "TableController@UpdateTable")->name("update_table")->where("table_id" , "\d+");
             

@@ -970,9 +970,10 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
         message: 'Hello World!',
         all_relations: [],
         field_names: [],
+        other_tables: "",
         field_ids: [],
         relation_order: 0,
-        field_order: 1,
+        field_order: 0,
         all_fields: [],
         send_checks: [],
         deleted_field: null,
@@ -996,13 +997,14 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
             var inputCount = document.getElementById("fields").getElementsByClassName("f-name").length;
             for (var r = 0; r < inputCount; r++) {
                 if (this.field_names.indexOf($(".f_name-" + r).val()) === -1 && $(".f_name-" + r).val() !== "") {
-                    this.field_names.push($(".f_name-" + r).val());
-                    this.field_ids.push();
+                    this.field_names.push($(".f_name-" + r).val()
+                    //this.field_ids.push();
+                    );
                 }
             }
 
             this.relation_order += 1;
-            this.all_relations.push({ component: 'add_relation', props: { relation_field: this.field_names, order: this.relation_order } });
+            this.all_relations.push({ component: 'add_relation', props: { relation_field: this.field_names, order: this.relation_order, other_tables: this.other_tables } });
         },
         add_field: function add_field() {
             this.field_order += 1;
@@ -1138,10 +1140,30 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
                     console.log(s);
                 }
             }
+        },
+        data_from_server: function data_from_server() {
+            var _this2 = this;
+
+            var url = window.location.href;
+            var route = url.split("/");
+            if (route[6] == "table" && route[7] == "add") {
+                console.log(route);
+                this.$http.post("/transformer/public//api/v1/table_add/data", { mode: "add" }).then(function (response) {
+                    console.log(response);
+                    _this2.other_tables = response;
+                });
+            } else if (route[6] == "table" && route[7] == "edit") {
+                console.log(route);
+                this.$http.post("/transformer/public//api/v1/table_add/data", { mode: "edit", explode: route[8] }).then(function (response) {
+                    console.log(response);
+                    _this2.other_tables = response;
+                });
+            }
         }
     },
     mounted: function mounted() {
         this.check_exist();
+        this.data_from_server();
     }
 });
 
@@ -2014,7 +2036,7 @@ module.exports = function spread(callback) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ["order", "page"],
+    props: ["order", "page", "other_tables"],
     data: function data() {
         return {};
     },
@@ -2058,7 +2080,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-	props: ["relation_field", "order"],
+	props: ["relation_field", "order", "other_tables"],
 	mounted: function mounted() {
 		this.fetch_fields(this.relation_field);
 		this.fetch_tables();
@@ -2082,9 +2104,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 		},
 		fetch_tables: function fetch_tables() {
 			var fetch_table = $("#fetch_table-" + this.order);
-			for (var f = 0; f < window.tests.length; f++) {
-				fetch_table.append('<option value="' + window.tests[f].table + '" > ' + window.tests[f].table + '</option>');
+			var o = 0;
+			while (o < this.other_tables.data.length) {
+				fetch_table.append('<option value="' + Object.values(this.other_tables.data[o])[1] + '" > ' + Object.values(this.other_tables.data[o])[1] + '</option>');
 				//console.log(window.tests[f].table)
+				o += 1;
 			}
 		}
 	}
@@ -2099,7 +2123,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ["field", "all_tables", "ids", "relation_table", "table_id", "all_fields", "relation_name"],
+    props: ["field", "all_tables", "ids", "relation_table", "table_id", "all_fields", "relation_name", "other_tables"],
     data: function data() {
         return {
             new_table: this.relation_table

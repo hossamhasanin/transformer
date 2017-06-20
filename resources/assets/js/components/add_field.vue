@@ -1,6 +1,6 @@
 <script>
 	export default {
-		props: ["order" , "page"],
+		props: ["order" , "page" , "other_tables"],
 		data () {
 			return {
 

@@ -1,6 +1,6 @@
 <script>
 	export default {
-		props: ["relation_field" , "order"],
+		props: ["relation_field" , "order" , "other_tables"],
 		mounted () {
 			this.fetch_fields(this.relation_field);
 			this.fetch_tables();
@@ -24,10 +24,12 @@
 			},
 			fetch_tables() {
 				var fetch_table = $("#fetch_table-"+this.order);
-				for (var f = 0; f < window.tests.length; f++) {
-					fetch_table.append('<option value="'+ window.tests[f].table +'" > '+ window.tests[f].table +'</option>');
-			        	//console.log(window.tests[f].table)
-			    }
+				var o = 0;
+				while(o<this.other_tables.data.length){
+					fetch_table.append('<option value="'+ Object.values(this.other_tables.data[o])[1] +'" > '+ Object.values(this.other_tables.data[o])[1] +'</option>');
+							//console.log(window.tests[f].table)
+					o += 1
+				}
 			}
 		}
 	}

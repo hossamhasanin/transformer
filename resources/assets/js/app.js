@@ -192,9 +192,10 @@ Vue.component("noti_undo" , {
     message: 'Hello World!',
     all_relations: [],
     field_names: [],
+    other_tables: "",
     field_ids: [],
     relation_order: 0,
-    field_order: 1,
+    field_order: 0,
     all_fields: [],
     send_checks: [],
     deleted_field: null,
@@ -219,12 +220,12 @@ Vue.component("noti_undo" , {
   		for (var r = 0; r < inputCount; r++) {
           if (this.field_names.indexOf($(".f_name-"+r).val()) === -1 && $(".f_name-"+r).val() !== ""){
             this.field_names.push($(".f_name-"+r).val())
-            this.field_ids.push();
+            //this.field_ids.push();
           }
         }
  		
  		this.relation_order += 1;        
-        this.all_relations.push({component: 'add_relation', props: {relation_field: this.field_names , order: this.relation_order}});
+        this.all_relations.push({component: 'add_relation', props: {relation_field: this.field_names , order: this.relation_order , other_tables: this.other_tables}});
   	},
   	add_field() {
   		this.field_order += 1;
@@ -356,11 +357,29 @@ Vue.component("noti_undo" , {
                 console.log(s)
             }
         }
+    },
+    data_from_server(){
+        var url = window.location.href
+        var route = url.split("/")
+        if (route[6] == "table" && route[7] == "add"){
+            console.log(route)
+            this.$http.post("/transformer/public//api/v1/table_add/data" , {mode: "add"}).then(response => {
+                console.log(response)
+                this.other_tables = response
+            });
+        } else if(route[6] == "table" && route[7] == "edit"){
+            console.log(route)
+            this.$http.post("/transformer/public//api/v1/table_add/data" , {mode: "edit" , explode: route[8]}).then(response => {
+                console.log(response)
+                this.other_tables = response
+            });
+        }
     }
 
   },
   mounted (){
     this.check_exist();
+    this.data_from_server();
   }
 
 })

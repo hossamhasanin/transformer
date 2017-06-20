@@ -1,7 +1,7 @@
 <script>
 
     export default {
-        props:["field" , "all_tables" , "ids" , "relation_table" , "table_id" , "all_fields" , "relation_name"],
+        props:["field" , "all_tables" , "ids" , "relation_table" , "table_id" , "all_fields" , "relation_name" , "other_tables"],
         data(){
             return {
                 new_table: this.relation_table
