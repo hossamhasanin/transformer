@@ -988,7 +988,8 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
         // belong to addOption page (this store component of multi choices)
         render_multi_values: [],
         //belong to addOption page (this uses for component render_multichoice_value)
-        render_data_order: 0
+        render_data_order: 0,
+        render_mode: ""
     },
     methods: {
         add_relation: function add_relation() {
@@ -1108,8 +1109,13 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
             var m_key = $("#multi_key-" + target_field).val();
             var m_val = $("#multi_value-" + target_field).val();
             this.render_data_order += 1;
+            if (this.render_mode == "edit") {
+                this.render_mode = "edit";
+            } else {
+                this.render_mode = "new";
+            }
             document.getElementById("multichoice_value-" + target_field).value += m_key + "@|" + m_val + "$|";
-            this.render_multi_values.push({ component: "render_multichoice_value", props: { order: this.render_data_order, value: m_key, text: m_val, target_field: target_field } });
+            this.render_multi_values.push({ component: "render_multichoice_value", props: { order: this.render_data_order, value: m_key, text: m_val, target_field: target_field, mode: this.render_mode } });
             document.getElementById("multi_key-" + target_field).value = "";
             document.getElementById("multi_value-" + target_field).value = "";
         },
@@ -1118,6 +1124,7 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
             this.render_data_order = 0;
             var target_field = $(event.target).attr("field_id");
             var multi_data = document.getElementById("multichoice_value-" + target_field).value;
+            // edit mode
             if (multi_data != "") {
                 var data_seprated = multi_data.match(/(\w+)/g);
                 console.log(data_seprated
@@ -1125,7 +1132,8 @@ new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
                 );var s = 0;
                 while (s < data_seprated.length) {
                     this.render_data_order += 1;
-                    this.render_multi_values.push({ component: "render_multichoice_value", props: { order: this.render_data_order, value: data_seprated[s], text: data_seprated[s + 1], target_field: target_field } });
+                    this.render_mode = "edit";
+                    this.render_multi_values.push({ component: "render_multichoice_value", props: { order: this.render_data_order, value: data_seprated[s], text: data_seprated[s + 1], target_field: target_field, mode: this.render_mode } });
                     s += 2;
                     console.log(s);
                 }
@@ -2153,14 +2161,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ["order", "value", "text", "target_field"],
+    props: ["order", "value", "text", "target_field", "mode"],
+    data: function data() {
+        return {
+            key_val: "",
+            key_text: "",
+            my_val: "",
+            my_text: ""
+        };
+    },
+
     methods: {
         remove_this: function remove_this() {
             $("#r_data-" + this.order).remove();
             var exp = /this.value@\|this.text\$\|/g;
             var new_val = document.getElementById("multichoice_value-" + this.target_field).value.replace(this.value + "@|" + this.text + "$|", '');
             document.getElementById("multichoice_value-" + this.target_field).value = new_val;
+        },
+        save_this: function save_this() {
+            var container = document.getElementById("multichoice_value-" + this.target_field).value;
+            var new_val = container.replace(this.value + "@|" + this.text + "$|", this.my_val + "@|" + this.my_text + "$|");
+            document.getElementById("multichoice_value-" + this.target_field).value = new_val;
+            console.log(new_val);
+            this.mode = "new";
+        },
+        reset_vals: function reset_vals() {
+            this.my_val = this.value;
+            this.my_text = this.text;
         }
+    },
+    mounted: function mounted() {
+        this.reset_vals();
     }
 });
 
@@ -2788,11 +2819,11 @@ if (false) {
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('tr', {
+  return (_vm.mode == 'new') ? _c('tr', {
     attrs: {
       "id": 'r_data-' + _vm.order
     }
-  }, [_c('td', [_vm._v(_vm._s(_vm.value))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.text))]), _vm._v(" "), _c('td', [_c('div', {
+  }, [_c('td', [_vm._v(_vm._s(_vm.my_val))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.my_text))]), _vm._v(" "), _c('td', [_c('div', {
     staticClass: "btn btn-danger",
     on: {
       "click": function($event) {
@@ -2801,6 +2832,72 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-times",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  })])])]) : _c('tr', {
+    attrs: {
+      "id": 'r_data-' + _vm.order
+    }
+  }, [_c('td', [_c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.my_val),
+      expression: "my_val"
+    }],
+    attrs: {
+      "type": "text"
+    },
+    domProps: {
+      "value": (_vm.my_val)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.my_val = $event.target.value
+      }
+    }
+  })]), _vm._v(" "), _c('td', [_c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.my_text),
+      expression: "my_text"
+    }],
+    attrs: {
+      "type": "text"
+    },
+    domProps: {
+      "value": (_vm.my_text)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.my_text = $event.target.value
+      }
+    }
+  })]), _vm._v(" "), _c('td', [_c('div', {
+    staticClass: "btn btn-danger",
+    on: {
+      "click": function($event) {
+        _vm.remove_this()
+      }
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-times",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  })])]), _vm._v(" "), _c('td', [_c('div', {
+    staticClass: "btn btn-success",
+    on: {
+      "click": function($event) {
+        _vm.save_this()
+      }
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-check",
     attrs: {
       "aria-hidden": "true"
     }

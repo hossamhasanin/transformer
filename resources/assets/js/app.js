@@ -211,6 +211,7 @@ Vue.component("noti_undo" , {
     render_multi_values: [],
     //belong to addOption page (this uses for component render_multichoice_value)
     render_data_order: 0,
+    render_mode: "",
   },
   methods: {
   	add_relation() {
@@ -326,8 +327,13 @@ Vue.component("noti_undo" , {
         var m_key = $("#multi_key-"+target_field).val()
         var m_val =  $("#multi_value-"+target_field).val()
         this.render_data_order += 1
+        if (this.render_mode == "edit"){
+            this.render_mode = "edit"
+        }else {
+            this.render_mode = "new"
+        }
         document.getElementById("multichoice_value-"+target_field).value += m_key + "@|" + m_val + "$|";
-        this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: m_key , text: m_val , target_field: target_field}});        
+        this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: m_key , text: m_val , target_field: target_field , mode: this.render_mode}});        
         document.getElementById("multi_key-"+target_field).value = ""
         document.getElementById("multi_value-"+target_field).value = ""
     },
@@ -336,14 +342,16 @@ Vue.component("noti_undo" , {
         this.render_data_order=0;
         var target_field = $(event.target).attr("field_id")        
         var multi_data = document.getElementById("multichoice_value-"+target_field).value;
+        // edit mode
         if (multi_data != ""){
            var data_seprated = multi_data.match(/(\w+)/g);
            console.log(data_seprated)
            //for(var s=0;s<data_seprated.length;s++){
-               var s = 0;
+            var s = 0;
             while(s < data_seprated.length){
                 this.render_data_order += 1
-                this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: data_seprated[s] , text: data_seprated[s+1] , target_field: target_field}});        
+                this.render_mode = "edit"
+                this.render_multi_values.push({component: "render_multichoice_value" , props: {order: this.render_data_order , value: data_seprated[s] , text: data_seprated[s+1] , target_field: target_field , mode: this.render_mode}});        
                 s += 2
                 console.log(s)
             }
