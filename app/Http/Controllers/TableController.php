@@ -104,7 +104,12 @@ class TableController extends Controller
               }
           }*/
           // save the default label_name
-          $fields->label_name = $name; 
+          $fields->label_name = $name;
+          foreach($request->relation_tables as $r_id => $table){
+              if ($name == $request->relation_name[$r_id]){
+                  $fields->relationship_field = 1;
+              }
+          } 
           $fields->save();
       }
 
@@ -146,6 +151,16 @@ class TableController extends Controller
         // modify the two models of relationships parent_model and child model
         if ($request->relation_tabels){
           $this->modify_model($request->relation_tabels , $request->relation_fields , $request->table_name , $request->module_name , $request->relation_name);
+        }
+        foreach($request->relation_tables as $id => $table){
+            $relationship = new relationships();
+            $table_id = a_Tables::where("table" , $table)->first()->id;
+            $field_id = fields::where("field_name" , $request->relation_fields[$id])->first();
+            $relationship->relation_name = $request->relation_name[$id];
+            $relationship->parent_id = $table_id;
+            $relationship->child_id = $a_tables->id;
+            $relationship->field_id = $field_id;
+            $relationship->save();
         }
 
         $request->session()->flash('table_success', 'Table was added successfully!');
