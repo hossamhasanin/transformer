@@ -12,6 +12,10 @@ class relt extends Model
 		 return $this->belongsTo('App\test_table' , "relt1");
 	}
 
+ public function lokpokpk_parent(){
+		 return $this->belongsTo('App\sksk' , "relt2");
+}
+
  //relationship places 
 
 }

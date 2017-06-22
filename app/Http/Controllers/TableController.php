@@ -47,7 +47,6 @@ class TableController extends Controller
         //"relation_name.*" => "required"
     ]);
 
-
         foreach (array_count_values($request->field_name) as $names){
             if ($names > 1){
                 return redirect("dashboard/table/add")->withErrors("There is fields repeated");
@@ -88,6 +87,7 @@ class TableController extends Controller
           // save the field_name in field name column
           $fields->field_name = $name;
           // store the field_type
+          $f_type = $request->field_type[$id] == "integer" ? "int(11)" : $request->field_type[$id];
           $fields->field_type = $request->field_type[$id];
           // save the table_name (indicate to the table of this column) in table_name column
           $fields->table_id = $a_tables->id;
@@ -186,7 +186,7 @@ class TableController extends Controller
              // define the model that should be the parent of the relation ship
                 $app_child_model = "'App\\$parent_model'";
              // add the function of the relationship to the child model
-                $child_replacment = "public function ". $relation_child_name ."(){\n" . "\t\t return".' $this->belongsTo('. $app_child_model .' , "'. $relation_fields[$relation_id] .'");'."\n\t\s}\n\n //relationship places";
+                $child_replacment = "public function ". $relation_child_name ."(){\n" . "\t\t return".' $this->belongsTo('. $app_child_model .' , "'. $relation_fields[$relation_id] .'");'."\n}\n\n//relationship places";
                 // remove the final line of the model that is "}\n"
                 $child_model_file = str_replace("//relationship places" , $child_replacment , $child_model_file);
                 // modify the content of this child model and the new changes
@@ -196,7 +196,7 @@ class TableController extends Controller
                 // define the parent model to put it in the function
                 $app_parent_model = "'App\\$child_model'";
                 // add the relationship function to parent model
-                $parent_replacement = 'public function '. $relation_parent_name ."(){\n\t" . 'return $this->hasMany('. $app_parent_model .' , "'. $relation_fields[$relation_id] .'");'."\n\s}\n\n //relationship places";
+                $parent_replacement = 'public function '. $relation_parent_name ."(){\n\t" . 'return $this->hasMany('. $app_parent_model .' , "'. $relation_fields[$relation_id] .'");'."\n}\n\n//relationship places";
                 // replace comment relationship places with relationship function
                 $parent_model_file = str_replace("//relationship places" , $parent_replacement , $parent_model_file);
                 // put this changes in the parent model
@@ -304,23 +304,43 @@ class TableController extends Controller
 
     public function UpdateTable($table_id , Request $request){
         $table_name = a_Tables::find($table_id)->table;
+        $slug = a_Tables::find($table_id)->slug;
         $table_model = a_Tables::find($table_id)->module_name;
 
         $this->validate($request , [
-            "table_name" => "required|unique:a_tables,table|max:255",
-            "link_name" => "required|unique:a_tables",
-            "slug" => "required|unique:a_tables",
-            "module_name" => "required|unique:a_tables",
+            "table_name" => "required|max:255",
+            "link_name" => "required",
+            "slug" => "required",
+            "module_name" => "required",
             'field_name.*' => "required",
             'ids.*' => "required|numeric",
             'field_type.*' => "required",
             'visibility.*' => "required",
             'label_name.*' => "required",
         ]);
-
+        $tables = a_Tables::where("id" ,"!=" , $table_id)->pluck("table");
+        $slugs = a_Tables::where("id" ,"!=" , $table_id)->pluck("slug");
+        $modules = a_Tables::where("id" ,"!=" , $table_id)->pluck("module_name");
+        $links = a_Tables::where("id" ,"!=" , $table_id)->pluck("link_name");
+        if (in_array($request->table_name , $tables->all())){
+            return redirect("dashboard/table/edit/" . $slug)->withErrors("OHH , you cann't name this table this name find other unique name");
+            die();
+        }
+        if (in_array($request->slug , $slugs->all())){
+            return redirect("dashboard/table/edit/" . $slug)->withErrors("OHH , you cann't add this slug its not unique");
+            die();
+        }
+        if (in_array($request->link_name , $links->all())){
+            return redirect("dashboard/table/edit/" . $slug)->withErrors("OHH , you cann't add this link name it sounds that this is old name change it");
+            die();
+        }
+        if (in_array($request->module_name , $modules->all())){
+            return redirect("dashboard/table/edit/" . $slug)->withErrors("OHH , you cann't name this table this name for some issues");
+            die();
+        }
         foreach (array_count_values($request->field_name) as $names){
             if ($names > 1){
-                return redirect("dashboard/table/edit/" + $table_name)->withErrors("There is fields repeated");
+                return redirect("dashboard/table/edit/" . $slug)->withErrors("There is fields repeated");
                 die();
             }
         }
@@ -328,16 +348,13 @@ class TableController extends Controller
         if ($request->relation_name){
             foreach (array_count_values($request->relation_name) as $names){
                 if ($names > 1){
-                    return redirect("dashboard/table/edit/"+ $table_name)->withErrors("There is relation_names repeated");
+                    return redirect("dashboard/table/edit/". $slug)->withErrors("There is relation_names repeated");
                     die();
                 }
             }
-        }
-
-        if ($request->field_in_relationship){
             foreach (array_count_values($request->field_in_relationship) as $names){
                 if ($names > 1){
-                    return redirect("dashboard/table/edit/"+ $table_name)->withErrors("There is field_in_relationships repeated");
+                    return redirect("dashboard/table/edit/".$slug)->withErrors("There is field_in_relationships repeated");
                     die();
                 }
             }
@@ -387,17 +404,27 @@ class TableController extends Controller
         // Array contains field_names for the new relationships
         $new_names = [];
         //$current_relations = relationships::get();
-
+        
         if ($request->relationship){
+            foreach($request->field_in_relationship as $id => $name){
+                $field_id = array_search($name , $request->field_name);
+                $field_type = $request->field_type[$field_id];
+                if ($field_type != "int(11)"){
+                    return redirect("dashboard/table/edit/" . $slug)->withErrors("hey bro , sorry but you cann't add relation with field not integer");            
+                    die();
+                }
+            }
             foreach ($request->relationship as $relation_id => $parent_table){
+                $parent_model = a_Tables::where("table" , $parent_table)->first()->module_name;
+                $child_model = a_Tables::find($table_id)->module_name;
                 $relationship = relationships::find($relation_id);
                 $parent_id = a_Tables::where("table" , $parent_table)->first()->id;
                 $field_id = fields::where("field_name" , $request->field_in_relationship[$relation_id])->first()->id;
                 $relation_parent_name = $request->relation_name[$relation_id] . "_child";
                 $relation_child_name = $request->relation_name[$relation_id] . "_parent";
-                $relation_old_parent_name = $relationship->relation_name . "_child";
-                $relation_old_child_name = $relationship->relation_name . "_parent";
-                if (!$relationship){
+                $relation_old_parent_name = isset($relationship->relation_name) ? $relationship->relation_name . "_child" : null;
+                $relation_old_child_name = isset($relationship->relation_name) ? $relationship->relation_name . "_parent" : null;
+                if ($relationship == null){
                     $new_relation = new relationships();
                     $new_relation->relation_name = $request->relation_name[$relation_id];
                     $new_relation->parent_id = $parent_id;
@@ -405,9 +432,31 @@ class TableController extends Controller
                     $new_relation->field_id = $field_id;
                     $new_relation->save();
 
-                    $new_parents[$relation_id] = $parent_table;
-                    $new_fields[$relation_id] = $request->field_in_relationship[$relation_id];
-                    $new_names[$relation_id] = $request->relation_name[$relation_id];
+                    // In old version this got replaced with lines under it to add new relationship function in the module
+                    // $new_parents[$relation_id] = $parent_table;
+                    // $new_fields[$relation_id] = $request->field_in_relationship[$relation_id];
+                    // $new_names[$relation_id] = $request->relation_name[$relation_id];
+
+
+                    $child_model_file = file_get_contents(app_path() . "/$child_model.php");
+                    // define the model that should be the parent of the relation ship
+                    $app_child_model = "'App\\$parent_model'";
+                    // Make the function of the child part of the relationship
+                    $relation_child_function = 'public function '. $relation_child_name ."(){\n" . "\t\t return".' $this->belongsTo('. $app_child_model .' , "'. $request->field_in_relationship[$relation_id] .'");'."\n}\n\n//relationship places";                        
+                    // Replace the old function with the new
+                    $child_model_file = str_replace("//relationship places", $relation_child_function , $child_model_file);
+                    // Put the changes in the file
+                    file_put_contents(app_path() . "/$child_model.php", $child_model_file);
+                    // parent modifing
+                    $parent_model_file = file_get_contents(app_path() . "/$parent_model.php");
+                    // define the parent model to put it in the function
+                    $app_parent_model = "'App\\$child_model'";
+                    // add the relationship function to parent model
+                    $relation_parent_function = 'public function '. $relation_parent_name ."(){\n" . "\t\t return".' $this->hasMany('. $app_parent_model .' , "'. $request->field_in_relationship[$relation_id] .'");'."\n}\n\n//relationship places";
+                    // Replace the old function with the new
+                    $parent_model_file = str_replace("//relationship places", $relation_parent_function, $parent_model_file);
+                    // Put the changes in the file
+                    file_put_contents(app_path() . "/$parent_model.php", $parent_model_file);
 
                 } elseif ($relationship->relation_name != $request->relation_name[$relation_id] || $relationship->parent_id != $parent_id || $relationship->field_id != $field_id) {
                     $relationship->relation_name = $request->relation_name[$relation_id];
@@ -415,14 +464,9 @@ class TableController extends Controller
                     $relationship->child_id = $table_id;
                     $relationship->field_id = $field_id;
                     $relationship->save();
-
-                    $parent_model = a_Tables::where("table" , $parent_table)->first()->module_name;
-                    $child_model = a_Tables::find($table_id)->module_name;
                     //$child_table = a_Tables::find($table_id)->table;
 
                     $child_model_edit = '/public\s*function\s*' . $relation_old_child_name . '\s*\(\)\s*\n*\{\s*\n*return\s+\$this->belongsTo\(.*\);\s*\n*\}/';
-
-
                     // get the child model content
                     try{
                         // Get the content of the child model
@@ -431,24 +475,18 @@ class TableController extends Controller
                     }catch(Exception $e){
                         echo "Error while opening the file , The error is : " . $e;
                     }
-
                     try{
                         // define the model that should be the parent of the relation ship
                         $app_child_model = "'App\\$parent_model'";
                         // Make the function of the child part of the relationship
-                        $relation_child_function = '
-                                public function '. $relation_child_name .'(){
-                                        return $this->belongsTo('. $app_child_model .' , "'. $request->field_in_relationship[$relation_id] .'");
-                                }';
+                        $relation_child_function = 'public function '. $relation_child_name ."(){\n" . "\t\t return".' $this->belongsTo('. $app_child_model .' , "'. $request->field_in_relationship[$relation_id] .'");'."\n}\n\n//relationship places";                        
                         // Replace the old function with the new
                         $child_model_file = preg_replace($child_model_edit, $relation_child_function , $child_model_file);
                         // Put the changes in the file
                         file_put_contents(app_path() . "/$child_model.php", $child_model_file);
-
                     }catch(Exception $e){
                         echo "Error while modifing the file , The error is : " . $e;
                     }
-
                     $parent_model_edit = '/public\s*function\s*' . $relation_old_parent_name . '\s*\(\)\s*\n*\{\s*\n*return\s+\$this->hasMany\(.*\);\s*\n*\}/';
                     // parent modifing
                     try{
@@ -461,10 +499,7 @@ class TableController extends Controller
                         // define the parent model to put it in the function
                         $app_parent_model = "'App\\$child_model'";
                         // add the relationship function to parent model
-                        $relation_parent_function = '
-                            public function '. $relation_parent_name .'(){
-                                    return $this->hasMany('. $app_parent_model .' , "'. $request->field_in_relationship[$relation_id] .'");
-                            }';
+                        $relation_parent_function = 'public function '. $relation_parent_name ."(){\n" . "\t\t return".' $this->hasMany('. $app_parent_model .' , "'. $request->field_in_relationship[$relation_id] .'");'."\n}\n\n//relationship places";
                         // Replace the old function with the new
                         $parent_model_file = preg_replace($parent_model_edit, $relation_parent_function, $parent_model_file);
                         // Put the changes in the file
@@ -478,42 +513,57 @@ class TableController extends Controller
             }
         }
 
-        if (count($new_parents) > 0) {
-            $this->modify_model($new_parents, $new_fields, $table_name, $table_model, $new_names);
-        }
+        // got replaced with line from 441
+        // if (count($new_parents) > 0) {
+        //     $this->modify_model($new_parents, $new_fields, $table_name, $table_model, $new_names);
+        // }
         
         
         $a_tables = a_Tables::find($table_id);
-        try{
-            DB::statement("RENAME TABLE $a_tables->table TO $request->table_name ;");
-            // table name
-            $a_tables->table = $request->table_name;
-        } catch(Execption $e){
-            echo("Error while changing the table name");
+        if ($a_tables->table != $request->table_name){
+            try{
+                DB::statement("RENAME TABLE $a_tables->table TO $request->table_name ;");
+                // table name
+                $a_tables->table = $request->table_name;
+            } catch(Execption $e){
+                echo("Error while changing the table name");
+            }
         }
-        // this is the name of link in dashlinks in a slide
-        $a_tables->link_name = $request->link_name;
-        // store the slug that should be url of this table
-        $a_tables->slug = $request->slug;
-        if (file_exists(app_path($a_tables->module_name.".php"))){
-           if (is_writable($a_tables->module_name.".php")){
-                rename(app_path($a_tables->module_name.".php") , app_path($request->module_name.".php"));     
-                // store model name in database
-                $a_tables->module_name = $request->module_name;
-           } else {
-               chmod(app_path($a_tables->module_name.".php") , 777);
-               rename(app_path($a_tables->module_name.".php") , app_path($request->module_name.".php"));     
-                // store model name in database
-               $a_tables->module_name = $request->module_name;
-           }     
-        
+        if ($a_tables->link_name != $request->link_name){
+            // this is the name of link in dashlinks in a slide
+            $a_tables->link_name = $request->link_name;
         }
-        // store array data in field by implode "," in it to avoid errors
-        $a_tables->field_types = implode("," ,$request->field_type);
-        // store the icon that should appear in the slide list in dashboard (I use the icons of font awoesome)
-        $a_tables->icon = $request->icon;
-        $a_tables->editable = $request->editable > 1 or $request->editable < 0 or ! is_int($request->editable) ? 1 : 0;
-        // Save the new data
+        if ($a_tables->slug != $request->slug){
+            // store the slug that should be url of this table
+            $a_tables->slug = $request->slug;
+        }
+        if ($a_tables->module_name != $request->module_name){
+            if (file_exists(app_path($a_tables->module_name.".php"))){
+                if (is_writable($a_tables->module_name.".php")){
+                        rename(app_path($a_tables->module_name.".php") , app_path($request->module_name.".php"));     
+                        // store model name in database
+                        $a_tables->module_name = $request->module_name;
+                } else {
+                    chmod(app_path($a_tables->module_name.".php") , 777);
+                    rename(app_path($a_tables->module_name.".php") , app_path($request->module_name.".php"));     
+                        // store model name in database
+                    $a_tables->module_name = $request->module_name;
+                }       
+            }
+        }
+        $fields_type = implode("," ,$request->field_type);
+        if ($a_tables->field_types != $fields_type){
+            // store array data in field by implode "," in it to avoid errors
+            $a_tables->field_types = $fields_type;
+        }
+        if ($a_tables->icon != $request->icon){
+            // store the icon that should appear in the slide list in dashboard (I use the icons of font awoesome)
+            $a_tables->icon = $request->icon;
+        }
+        if ($a_tables->editable != $request->editable){
+            $a_tables->editable = $request->editable > 1 or $request->editable < 0 or ! is_int($request->editable) ? 1 : 0;
+        }
+        // Save the data
         $a_tables->save();
 
         //$table_fields = fields::where("table_id" , $table_id)->get();

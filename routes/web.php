@@ -143,5 +143,9 @@ public function tester(){
     //   file_put_contents(app_path() . "/test2.php", $child_model_file);
     //   $f = file_get_contents(app_path() . "/test2.php");
     //   dd($child_model_file);
-
+    $r = \App\relationships::find(10);
+    if ($r == null){
+        echo True;
+    }
+    dd($r);
 });
