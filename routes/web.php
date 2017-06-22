@@ -135,6 +135,13 @@ public function tester(){
     /*preg_match('/[^.]+\.[^.]+$/', $host, $matches);
     echo "domain name is: {$matches[0]}\n";*/
 
-chmod(storage_path("framework/sessions") , 0777);
+    //chmod(storage_path("framework/sessions") , 0777);
+    //   $search_for = '/class\s*'. 'test2' .'\s*extends\s*Model\s*\n*\{\n*\s*\/\/\n*\}/';
+    //   $module_file = file_get_contents(app_path() . "/test2.php");
+    //   $add_table_name = 'class '. 'test2 ' ."extends Model \n{\n"."\t protected " . '$table = '. "'test2';\n\n" .'}';
+    //   $child_model_file = preg_replace($search_for, $add_table_name , $module_file);
+    //   file_put_contents(app_path() . "/test2.php", $child_model_file);
+    //   $f = file_get_contents(app_path() . "/test2.php");
+    //   dd($child_model_file);
 
 });

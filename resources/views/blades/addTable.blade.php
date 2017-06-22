@@ -86,9 +86,9 @@
                   <th>Remove</th>
                 </tr>
                 <tr>
-                  <td><input class="form-control f-name f_name-0" placeholder="Field Name" name="field_name[]" type="text"></td>
+                  <td><input class="form-control f-name f_name-0" placeholder="Field Name" name="field_name[0]" type="text"></td>
                   <td>
-                    <select class="form-control" name="field_type[]">
+                    <select class="form-control" name="field_type[0]">
                         <option>chose</option>
                         <option value="float">Float</option>
                         <option value="dateTime">DateTime</option>
@@ -102,12 +102,12 @@
                   <td>
                     <div class="checkbox checkbox-slider--b checkbox-slider-md">  
                       <label>
-                        <input name="nullable[]" type="checkbox"><span></span>
+                        <input name="nullable[0]" type="checkbox"><span></span>
                       </label>
                     </div>
                   </td>
                   <td>
-                    <input class="form-control d_value-0" placeholder="Defualt value" name="default_value[]" type="text">
+                    <input class="form-control d_value-0" placeholder="Defualt value" name="default_value[0]" type="text">
                   </td>
                   <td>
                     <h4 class="text-danger" style="font-family: 'Mada', sans-serif;">يا عزيزي لا يجب ازالة هدا الحقل</h4>  

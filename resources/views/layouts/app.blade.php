@@ -368,7 +368,7 @@
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
         @foreach($linkes as $link)
-          <li class="active treeview">
+          <li class="treeview">
           <a href="#">
             <i class="fa {{ $link->icon }}"></i> <span>{{ $link->link_name }}</span>
             <span class="pull-right-container">

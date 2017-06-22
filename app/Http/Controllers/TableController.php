@@ -47,9 +47,6 @@ class TableController extends Controller
         //"relation_name.*" => "required"
     ]);
 
-      if (isset($request->table_name)){
-          $request->table_name = substr($request->table_name, -1) != "s" ? $request->table_name . "s" : $request->table_name;
-      }
 
         foreach (array_count_values($request->field_name) as $names){
             if ($names > 1){
@@ -105,11 +102,13 @@ class TableController extends Controller
           }*/
           // save the default label_name
           $fields->label_name = $name;
-          foreach($request->relation_tables as $r_id => $table){
-              if ($name == $request->relation_name[$r_id]){
-                  $fields->relationship_field = 1;
-              }
-          } 
+          if ($request->relation_fields){
+                foreach($request->relation_fields as $r => $f){
+                    if ($name == $f){
+                        $fields->relationship_field = 1;
+                    }
+                } 
+          }
           $fields->save();
       }
 
@@ -123,7 +122,11 @@ class TableController extends Controller
       Artisan::call('make:model', [
             "name" => $request->module_name
         ]);
-
+      $search_for = '/class\s*'. $request->module_name .'\s*extends\s*Model\s*\n*\{\n*\s*\/\/\n*\}/';
+      $module_file = file_get_contents(app_path() . "/$request->module_name.php");
+      $add_table_name = 'class '. $request->module_name ." extends Model \n{\n"."\t protected " . '$table = '. "'" . $request->table_name ."'" . ";\n\n\t //relationship places \n\n" .'}';
+      $model_file = preg_replace($search_for, $add_table_name , $module_file);
+      file_put_contents(app_path() . "/$request->module_name.php", $model_file);
         // Create the new table in data base
         Schema::create($request->table_name , function (Blueprint $table) {
           $table->increments('id');
@@ -131,7 +134,7 @@ class TableController extends Controller
           foreach ($this->names as $name_id => $name ) {
             //define the type of this field easily
                 $type = $this->types[$name_id];
-                if ($this->nullables[$name_id]){
+                if (isset($this->nullables[$name_id])){
                   if ($this->default_values[$name_id]){
                     $table->$type($name)->nullable()->default($this->default_values[$name_id]);
                   } else {
@@ -150,17 +153,17 @@ class TableController extends Controller
 
         // modify the two models of relationships parent_model and child model
         if ($request->relation_tabels){
-          $this->modify_model($request->relation_tabels , $request->relation_fields , $request->table_name , $request->module_name , $request->relation_name);
-        }
-        foreach($request->relation_tables as $id => $table){
-            $relationship = new relationships();
-            $table_id = a_Tables::where("table" , $table)->first()->id;
-            $field_id = fields::where("field_name" , $request->relation_fields[$id])->first();
-            $relationship->relation_name = $request->relation_name[$id];
-            $relationship->parent_id = $table_id;
-            $relationship->child_id = $a_tables->id;
-            $relationship->field_id = $field_id;
-            $relationship->save();
+            $this->modify_model($request->relation_tabels , $request->relation_fields , $request->table_name , $request->module_name , $request->relation_name);
+            foreach($request->relation_tabels as $id => $table){
+                $relationship = new relationships();
+                $table_id = a_Tables::where("table" , $table)->first()->id;
+                $field_id = fields::where("field_name" , $request->relation_fields[$id])->first()->id;
+                $relationship->relation_name = $request->relation_name[$id];
+                $relationship->parent_id = $table_id;
+                $relationship->child_id = $a_tables->id;
+                $relationship->field_id = $field_id;
+                $relationship->save();
+            }
         }
 
         $request->session()->flash('table_success', 'Table was added successfully!');
@@ -180,37 +183,29 @@ class TableController extends Controller
                 $parent_model = a_Tables::where("table" , $relation_tabel)->first()->module_name;
              // get the child model content
                 $child_model_file = file_get_contents(app_path() . "/$child_model.php");
-             // remove the final line of the model that is "}\n"
-                $child_model_file = str_replace("}\n" , "" , $child_model_file);
              // define the model that should be the parent of the relation ship
                 $app_child_model = "'App\\$parent_model'";
              // add the function of the relationship to the child model
-                $child_model_file = $child_model_file . '
-public function '. $relation_child_name .'(){
-       return $this->belongsTo('. $app_child_model .' , "'. $relation_fields[$relation_id] .'");
-}
-}';
+                $child_replacment = "public function ". $relation_child_name ."(){\n" . "\t\t return".' $this->belongsTo('. $app_child_model .' , "'. $relation_fields[$relation_id] .'");'."\n\t\s}\n\n //relationship places";
+                // remove the final line of the model that is "}\n"
+                $child_model_file = str_replace("//relationship places" , $child_replacment , $child_model_file);
                 // modify the content of this child model and the new changes
                 file_put_contents(app_path() . "/$child_model.php" , $child_model_file);
                 // get the content of the parent model
                 $parent_model_file = file_get_contents(app_path() . "/$parent_model.php");
-                // remove the last line in the parent model
-                $parent_model_file = str_replace("}\n" , "" , $parent_model_file);
                 // define the parent model to put it in the function
                 $app_parent_model = "'App\\$child_model'";
                 // add the relationship function to parent model
-                $parent_model_file = $parent_model_file . '
-public function '. $relation_parent_name .'(){
-       return $this->hasMany('. $app_parent_model .' , "'. $relation_fields[$relation_id] .'");
-}
-}';
+                $parent_replacement = 'public function '. $relation_parent_name ."(){\n\t" . 'return $this->hasMany('. $app_parent_model .' , "'. $relation_fields[$relation_id] .'");'."\n\s}\n\n //relationship places";
+                // replace comment relationship places with relationship function
+                $parent_model_file = str_replace("//relationship places" , $parent_replacement , $parent_model_file);
                 // put this changes in the parent model
                 file_put_contents(app_path() . "/$parent_model.php" , $parent_model_file);
         }
     }
 
     public function AddOption($table){
-        $fields_data = a_Tables::where("slug" , $table)->first()->fields()->get();
+        $fields_data = a_Tables::where("slug" , $table , "and" , "relationship_field" , 0)->first()->fields()->get();
 
         $table_id = a_Tables::where("slug" , $table)->first()->id;
 
@@ -300,7 +295,7 @@ public function '. $relation_parent_name .'(){
 
         $relations = a_Tables::where("slug" , $table)->first()->child_relation()->get();
 
-        $all_fields = fields::pluck("field_name");
+        $all_fields = fields::where("table_id" , $table_id)->pluck("field_name");
 
         $table_info = a_Tables::where("slug" , $table)->first();
 
@@ -545,6 +540,31 @@ public function '. $relation_parent_name .'(){
             } else{
                 chmod(app_path($table->module_name.".php") , 777);
                 unlink(app_path($table->module_name.".php"));
+            }
+            $table_parent = relationships::where("parent_id" , $table_id)->get();
+            $table_child = relationships::where("child_id" , $table_id)->get();
+            if (isset($table_parent) && $table_parent->isNotEmpty()){
+                // delete the relationships functions from the child modules
+                foreach($table_parent as $relation){
+                    $module = a_Tables::find($relation->child_id)->first()->module_name;
+                    $search_for = '/public\s*function\s*' . $relation->relation_name . "_parent" . '\s*\(\)\s*\n*\{\s*\n*return\s+\$this->belongsTo\(.*\);\s*\n*\}/';                    
+                    $module_file = file_get_contents(app_path() . "/$module.php");
+                    $model_file = preg_replace($search_for, "" , $module_file);
+                    file_put_contents(app_path() . "/$module.php", $model_file);
+                    // delete the relationship from the table in the database
+                    $relation->delete();
+                }                
+            } elseif (isset($table_child) && $table_child->isNotEmpty()){
+                // delete the relationships functions from the child modules                
+                foreach($table_child as $relation){
+                    $module = a_Tables::find($relation->parent_id)->first()->module_name;
+                    $search_for = '/public\s*function\s*' . $relation->relation_name . "_child" . '\s*\(\)\s*\n*\{\s*\n*return\s+\$this->hasMany\(.*\);\s*\n*\}/';                    
+                    $module_file = file_get_contents(app_path() . "/$module.php");
+                    $model_file = preg_replace($search_for, "" , $module_file);
+                    file_put_contents(app_path() . "/$module.php", $model_file);
+                    // delete the relationship from the table in the database
+                    $relation->delete();
+                }
             }
             $table->delete();
             session()->flash('table_success', 'You deleted the table successfully :)');

@@ -2968,7 +2968,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "form-control",
     attrs: {
       "id": 'fetch_table-' + _vm.order,
-      "name": "'relation_tabels['+ order +']'"
+      "name": 'relation_tabels[' + _vm.order + ']'
     }
   }, [_c('option', [_vm._v("chose")])])]), _vm._v(" "), _c('div', {
     staticClass: "col-xs-1 col-md-1"

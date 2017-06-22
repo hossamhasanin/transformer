@@ -49,7 +49,7 @@
 		</div>
 		<div class='col-xs-3 col-md-4'>
 			<label>chose table</label>
-			<select class='form-control' v-bind:id="'fetch_table-' + order"  name="'relation_tabels['+ order +']'">
+			<select class='form-control' v-bind:id="'fetch_table-' + order"  v-bind:name="'relation_tabels['+ order +']'">
 				<option>chose</option>
 			</select>
 		</div>
