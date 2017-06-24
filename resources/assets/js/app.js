@@ -14,8 +14,6 @@ import multi_choice from './components/multi_choice';
 
 import render_multichoice_value from './components/render_multichoice_value';
 
-import fields_in_same_table from './components/fields_in_same_table';
-
 
 require("./bootstrap-toggle.min.js");
 

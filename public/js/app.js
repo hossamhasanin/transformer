@@ -817,16 +817,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__components_multi_choice___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__components_multi_choice__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__components_render_multichoice_value__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__components_render_multichoice_value___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__components_render_multichoice_value__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__components_fields_in_same_table__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__components_fields_in_same_table___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__components_fields_in_same_table__);
 
 
 
 
 
 // importing custom components
-
-
 
 
 
@@ -2167,28 +2163,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 31 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-    props: ["table_fields", "field_id"],
-    methods: {
-        fetch_table_fields: function fetch_table_fields() {
-            var t = 0;
-            while (t < table_fields.data.length) {
-                var fetch_fields = $("#table_fields-" + this.order);
-                fetch_fields.append("<input type='checkbox' value='" + Object.values(this.other_tables.data[t])[0] + "'>");
-                t += 1;
-            }
-        }
-    }
-});
-
-/***/ }),
+/* 31 */,
 /* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2626,40 +2601,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Component = __webpack_require__(1)(
-  /* script */
-  __webpack_require__(31),
-  /* template */
-  __webpack_require__(47),
-  /* scopeId */
-  null,
-  /* cssModules */
-  null
-)
-Component.options.__file = "C:\\xampp\\htdocs\\transformer\\resources\\assets\\js\\components\\fields_in_same_table.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
-if (Component.options.functional) {console.error("[vue-loader] fields_in_same_table.vue: functional components are not supported with templates, they should use render functions.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-9639c9ac", Component.options)
-  } else {
-    hotAPI.reload("data-v-9639c9ac", Component.options)
-  }
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
+/* 40 */,
 /* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3074,29 +3016,7 @@ if (false) {
 }
 
 /***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    staticClass: "row"
-  }, [_c('div', {
-    staticClass: "col-md-12"
-  }, [_c('div', {
-    attrs: {
-      "id": 'table_fields-' + _vm.field_id
-    }
-  })])])
-},staticRenderFns: []}
-module.exports.render._withStripped = true
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-     require("vue-hot-reload-api").rerender("data-v-9639c9ac", module.exports)
-  }
-}
-
-/***/ }),
+/* 47 */,
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
