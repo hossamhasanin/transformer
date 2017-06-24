@@ -188,11 +188,12 @@ class TableControllerApi extends Controller
     {
         if ($request->mode == "add"){
             $required_data = a_Tables::get();
-            return response($required_data);
         } elseif ($request->mode == "edit"){
             $required_data = a_Tables::where("slug" , "!=" , $request->explode)->get();
-            return response($required_data);
+        } elseif ($request->mode == "option") {
+            $required_data = fields::where("table_id" , $request->table_id)->get();
         }
+        return response($required_data);
     }
 
 }

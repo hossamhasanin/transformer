@@ -118,6 +118,7 @@
                               <tr id="field_render_container-{{ $field_data->id }}">
                                   <input type="hidden" name="ids[{{ $field_data->id }}]" value="{{ $field_data->id }}" class="ids">
                                   <input type="hidden" id="multichoice_value-{{ $field_data->id }}" name="multichoice_value[{{ $field_data->id }}]" value="">
+                                  <input type="hidden" id="send_data_same_table-{{ $field_data->id }}" name="data_same_table[{{ $field_data->id }}]" value="">                                  
                                 <td><input class="form-control f-name f_name-0" value="{{ $field_data->field_name  }}" placeholder="Field Name" name="field_name[{{ $field_data->id }}]" type="text"></td>
                                 <td>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="textbox"> Textbox<br>
@@ -151,8 +152,18 @@
                                     <div class="btn btn-success" field_id="{{ $field_data->id }}" @click="multi_custom($event)">Use Custom values</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="btn btn-primary">Database values</div>                                
+                                    <div class="btn btn-primary" field_id="{{ $field_data->id }}" @click="show_database_vals($event)">Database values</div>                                
                                 </div>                            
+                            </div>
+                            <div class="database_vals-{{ $field_data->id }}" style = "display:none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="btn btn-success" field_id = "{{ $field_data->id }}" @click="data_from_this_table($event)" >Data from field in this table</div>                                               
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="btn btn-primary">Data from field in other table</div>                                                                    
+                                    </div>                                    
+                                </div>
                             </div>
                             <div id="render_table-{{ $field_data->id }}" style="display:none;">
                                 <div class="row">
@@ -171,6 +182,17 @@
                                     </div>
                                 </div>
                                 <multi_choice :order="1" :target_field="{{ $field_data->id }}"></multi_choice>
+                            </div>
+                            <div class="data_same_table-{{ $field_data->id }}" style="display:none;">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                    @foreach($fields as $field)
+                                        @if ($field_data->id != $field->id)
+                                            <input type="radio" name="data_same_table[{{ $field_data->id }}]" main_field="{{ $field_data->id }}" field="{{ $field->id }}" @click="check_this_field($event)" value=""><span> {{ $field->field_name }}</span>
+                                        @endif
+                                    @endforeach
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">

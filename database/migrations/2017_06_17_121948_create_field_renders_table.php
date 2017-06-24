@@ -17,6 +17,8 @@ class CreateFieldRendersTable extends Migration
             $table->increments('id');
             $table->integer("field_id");
             $table->integer("table_id");
+            $table->integer("data_s_table");
+            $table->string("data_o_table");            
             $table->longText("html_code");
             $table->timestamps();
         });

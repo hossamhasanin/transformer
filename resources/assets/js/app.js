@@ -14,6 +14,8 @@ import multi_choice from './components/multi_choice';
 
 import render_multichoice_value from './components/render_multichoice_value';
 
+import fields_in_same_table from './components/fields_in_same_table';
+
 
 require("./bootstrap-toggle.min.js");
 
@@ -313,6 +315,7 @@ Vue.component("noti_undo" , {
             console.log(response)
         });
     },
+    // Methods addOption blade
     multi_custom(event){
         //var push_test = this.custom_multi_vals
         var target_id = $(event.target).attr("field_id")                    
@@ -358,18 +361,35 @@ Vue.component("noti_undo" , {
             }
         }
     },
+    show_database_vals(event){
+        var target_id = $(event.target).attr("field_id");
+        $(".multi_parts-"+target_id).fadeOut(function(){
+            $(".database_vals-"+target_id).fadeIn()
+        })               
+    },
+    data_from_this_table(event){
+        var target_id = $(event.target).attr("field_id");
+        $(".database_vals-"+target_id).fadeOut(function(){
+            $(".data_same_table-"+target_id).fadeIn()
+        })  
+    },
+    check_this_field(event){
+        var field = $(event.target).attr("field");
+        var main_field = $(event.target).attr("main_field");        
+        document.getElementById("send_data_same_table-"+main_field).value = field
+    },
     data_from_server(){
         var url = window.location.href
         var route = url.split("/")
         if (route[6] == "table" && route[7] == "add"){
             console.log(route)
-            this.$http.post("/transformer/public//api/v1/table_add/data" , {mode: "add"}).then(response => {
+            this.$http.post("/transformer/public/api/v1/get_data" , {mode: "add"}).then(response => {
                 console.log(response)
                 this.other_tables = response
             });
         } else if(route[6] == "table" && route[7] == "edit"){
             console.log(route)
-            this.$http.post("/transformer/public//api/v1/table_add/data" , {mode: "edit" , explode: route[8]}).then(response => {
+            this.$http.post("/transformer/public/api/v1/get_data" , {mode: "edit" , explode: route[8]}).then(response => {
                 console.log(response)
                 this.other_tables = response
             });
