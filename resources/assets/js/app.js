@@ -14,6 +14,7 @@ import multi_choice from './components/multi_choice';
 
 import render_multichoice_value from './components/render_multichoice_value';
 
+import data_from_other_table from './components/data_from_other_table';
 
 require("./bootstrap-toggle.min.js");
 
@@ -48,6 +49,7 @@ Vue.component('multi_choice', multi_choice);
 
 Vue.component("render_multichoice_value" , render_multichoice_value);
 
+Vue.component("data_from_other_table" , data_from_other_table);
 // important var used in three components
 var back_again = [];
 
@@ -213,6 +215,8 @@ Vue.component("noti_undo" , {
     //belong to addOption page (this uses for component render_multichoice_value)
     render_data_order: 0,
     render_mode: "",
+    // array contains data_from_other_table component
+    from_other_table:[],
   },
   methods: {
   	add_relation() {
@@ -365,16 +369,39 @@ Vue.component("noti_undo" , {
             $(".database_vals-"+target_id).fadeIn()
         })               
     },
+    // this for getting data from other field in the same table
     data_from_this_table(event){
         var target_id = $(event.target).attr("field_id");
         $(".database_vals-"+target_id).fadeOut(function(){
             $(".data_same_table-"+target_id).fadeIn()
-        })  
+        })
+        var fields = document.getElementsByClassName("number_fields-"+target_id)
+        if (fields.length == 0){
+            $(".show_fields_other_table-"+target_id).append("<div class='alert alert-info'><h4>No fields to get data from</h4></div>");
+        }
     },
+    // Put the results inside hidden input to send it to the server
     check_this_field(event){
         var field = $(event.target).attr("field");
         var main_field = $(event.target).attr("main_field");        
         document.getElementById("send_data_same_table-"+main_field).value = field
+    },
+    // Get data field in other table
+    data_from_other_table(event){
+        var target_id = $(event.target).attr("field_id");
+        $(".database_vals-"+target_id).fadeOut(function(){
+            $(".data_other_table-"+target_id).fadeIn()
+        })
+    },
+    switch_between_table_fields(event){
+        this.from_other_table.splice(0);
+        var e = event.target
+        var table_id = e.options[e.selectedIndex].value;
+        var field_id = $(e).attr("field_id");;
+        this.$http.post("/transformer/public/api/v1/get_data" , {mode: "option" , table_id:table_id}).then(response => {
+            this.from_other_table.push({component : "data_from_other_table" , props:{fields: response.data , table_id: table_id , field_id: field_id}});
+            console.log(response.data)
+        })        
     },
     data_from_server(){
         var url = window.location.href

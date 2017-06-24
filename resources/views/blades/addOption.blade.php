@@ -119,6 +119,7 @@
                                   <input type="hidden" name="ids[{{ $field_data->id }}]" value="{{ $field_data->id }}" class="ids">
                                   <input type="hidden" id="multichoice_value-{{ $field_data->id }}" name="multichoice_value[{{ $field_data->id }}]" value="">
                                   <input type="hidden" id="send_data_same_table-{{ $field_data->id }}" name="data_same_table[{{ $field_data->id }}]" value="">                                  
+                                  <input type="hidden" id="send_data_other_table-{{ $field_data->id }}" name="data_other_table[{{ $field_data->id }}]" value="">                                  
                                 <td><input class="form-control f-name f_name-0" value="{{ $field_data->field_name  }}" placeholder="Field Name" name="field_name[{{ $field_data->id }}]" type="text"></td>
                                 <td>
                                     <input type="radio" name="render_type[{{ $field_data->id }}]" value="textbox"> Textbox<br>
@@ -161,7 +162,7 @@
                                         <div class="btn btn-success" field_id = "{{ $field_data->id }}" @click="data_from_this_table($event)" >Data from field in this table</div>                                               
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="btn btn-primary">Data from field in other table</div>                                                                    
+                                        <div class="btn btn-primary" field_id = "{{ $field_data->id }}" @click="data_from_other_table($event)" >Data from field in other table</div>                                                                    
                                     </div>                                    
                                 </div>
                             </div>
@@ -185,12 +186,31 @@
                             </div>
                             <div class="data_same_table-{{ $field_data->id }}" style="display:none;">
                                 <div class="row">
-                                    <div class="col-md-12">
-                                    @foreach($fields as $field)
+                                    <div class="col-md-12 show_fields_other_table-{{ $field_data->id }}">
+                                    @foreach($fields_data as $field)
                                         @if ($field_data->id != $field->id)
-                                            <input type="radio" name="data_same_table[{{ $field_data->id }}]" main_field="{{ $field_data->id }}" field="{{ $field->id }}" @click="check_this_field($event)" value=""><span> {{ $field->field_name }}</span>
+                                            <input type="radio" name="data_same_table[{{ $field_data->id }}]" class="number_fields-{{ $field_data->id }}" main_field="{{ $field_data->id }}" field="{{ $field->id }}" @click="check_this_field($event)" value=""><span> {{ $field->field_name }}</span>
                                         @endif
                                     @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="data_other_table-{{ $field_data->id }}" style="display:none;">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label style="margin-left: 40%;"><h3>Chose the table:</h3></label><br>                                            
+                                            <select field_id="{{ $field_data->id}}" @change="switch_between_table_fields($event)" class="form-control">
+                                                <option disabled selected >Chose one</option>
+                                            @foreach($tables as $table)
+                                                <option value="{{ $table->id }}">{{ $table->table }}</option>
+                                            @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group fields_from_other_table-{{ $field_data->id }}">
+                                            <label style="margin-left: 45%;"><h3>Fields:</h3></label><br>
+                                            <div :is="data.component" v-for="data in from_other_table" v-bind="data.props"></div>                                            
+                                        </div>                              
                                     </div>
                                 </div>
                             </div>

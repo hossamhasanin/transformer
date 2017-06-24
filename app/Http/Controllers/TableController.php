@@ -207,11 +207,13 @@ class TableController extends Controller
     public function AddOption($table){
         $fields_data = a_Tables::where("slug" , $table )->first()->fields()->where("relationship_field" , 0)->get();
 
-        $fields = a_Tables::where("slug" , $table )->first()->fields()->where("relationship_field" , 0)->get();
+        //$fields = a_Tables::where("slug" , $table )->first()->fields()->where("relationship_field" , 0)->get();
+
+        $tables = a_Tables::get();
 
         $table_id = a_Tables::where("slug" , $table)->first()->id;
 
-        return view("blades.addOption" , ["fields_data" => $fields_data , "table_id" => $table_id , "fields" => $fields]);
+        return view("blades.addOption" , ["fields_data" => $fields_data , "table_id" => $table_id , "tables" => $tables]);
 
     }
 
